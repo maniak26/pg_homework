@@ -96,3 +96,13 @@
         # - name: Print init result
         #   ansible.builtin.debug:
         #     var: resulit.statusmessage # rowcount
+
+        - name: Copy workload file to postgres home
+          ansible.builtin.copy:
+            src: "files/sql/workload.sql"
+            dest: "/var/lib/postgresql/workload.sql"
+            owner: postgres
+            group: postgres
+            mode: '0644'
+            remote_src: false
+
