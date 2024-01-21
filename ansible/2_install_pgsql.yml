@@ -1,0 +1,26 @@
+- hosts: all
+  gather_facts: true
+  vars:
+    ansible_user: root
+    # moved to hostvars
+    # postgresql_version: 15
+  tasks:
+    - name: Import postgresql apt key
+      ansible.builtin.apt_key:
+        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        state: present
+    - name: Add postgresql repository
+      ansible.builtin.apt_repository:
+        repo: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
+        state: present
+    - name: Install pg package
+      ansible.builtin.package:
+        name:
+          - "postgresql-{{ postgresql_version }}"
+          - pgtop
+        update_cache: true
+    - name: Backup original config
+      ansible.builtin.copy:
+        remote_src: true
+        src: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+        dest: /root/postgresql.conf"

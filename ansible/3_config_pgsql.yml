@@ -1,0 +1,27 @@
+- hosts: all
+  gather_facts: true
+  vars:
+    ansible_user: root
+    # moved to hostvars
+    # postgresql_version: 15
+  tasks:
+    - name: Restort original config
+      ansible.builtin.copy:
+        remote_src: true
+        src: /root/postgresql.conf"
+        dest: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+    - name: Create/update somefile.config
+      ansible.builtin.blockinfile:
+        path: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+        insertbefore: "EOF"
+        block: "{{ item }}"
+      with_items:
+        - "{{lookup('ansible.builtin.file', 'files/pg_{{ postgresql_version }}.conf') }}"
+      notify:
+        - Restart pgsql
+
+  handlers:
+    - name: Restart pgsql
+      ansible.builtin.service:
+        name: postgresql
+        state: restarted

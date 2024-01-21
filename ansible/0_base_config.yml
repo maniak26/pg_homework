@@ -1,0 +1,26 @@
+- hosts: all
+  gather_facts: true
+  vars:
+    ansible_user: root
+  tasks:
+    - name: Update all packages
+      ansible.builtin.package:
+        name: "*"
+        state: latest
+        update_cache: true
+      notify:
+        - Reboot vm
+    - name: Install base packages
+      ansible.builtin.package:
+        name:
+          - mc
+          - htop
+          - iotop
+          - net-tools
+          - atop
+          - htop
+          - unzip
+          - netperf
+  handlers:
+    - name: Reboot vm
+      ansible.builtin.reboot:

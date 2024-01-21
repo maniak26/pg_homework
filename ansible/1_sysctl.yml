@@ -1,0 +1,39 @@
+- hosts: all
+  gather_facts: true
+  vars:
+    ansible_user: root
+  tasks:
+    - name: Set vm.swappiness
+      ansible.posix.sysctl:
+        name: vm.swappiness
+        value: 5
+        state: present
+      notify:
+        - Reboot vm
+    - name: Set vm.nr_hugepages
+      ansible.posix.sysctl:
+        name: vm.nr_hugepages
+        value: 102400
+        state: present
+      notify:
+        - Reboot vm
+    - name: Set vm.overcommit_memory
+      ansible.posix.sysctl:
+        name: vm.overcommit_memory
+        value: 2
+        state: present
+      notify:
+        - Reboot vm
+    - name: Set vm.overcommit_ratio
+      ansible.posix.sysctl:
+        name: vm.overcommit_ratio
+        value: 50
+        state: present
+      notify:
+        - Reboot vm
+    - name: Disable transparent_hugepage
+      ansible.builtin.shell: echo never > /sys/kernel/mm/transparent_hugepage/enabled
+
+  handlers:
+    - name: Reboot vm
+      ansible.builtin.reboot:
