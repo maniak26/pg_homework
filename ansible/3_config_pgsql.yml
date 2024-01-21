@@ -5,6 +5,7 @@
     # moved to hostvars
     # postgresql_version: 15
   tasks:
+    # postgresql.conf
     - name: Restort original config
       ansible.builtin.copy:
         remote_src: true
@@ -16,12 +17,64 @@
         insertbefore: "EOF"
         block: "{{ item }}"
       with_items:
-        - "{{lookup('ansible.builtin.file', 'files/pg_{{ postgresql_version }}.conf') }}"
+        - "{{ lookup('ansible.builtin.file', 'files/configs/pg_{{ postgresql_version }}.conf') }}"
       notify:
         - Restart pgsql
+
+    - name: Configure PostgreSQL. Set listen_addresses.
+      lineinfile: 
+        dest: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+        regexp: "listen_addresses =" 
+        line: "listen_addresses = '*'" 
+        state: present
+      notify: Restart pgsql
+    # PG_HBA
+    - name: Add to pg_hba 'host all all 10.0.0.0/8 scram-sha-256'
+      community.postgresql.postgresql_pg_hba:
+        dest: /etc/postgresql/15/main/pg_hba.conf
+        contype: host
+        users: all
+        source: 10.0.0.0/8
+        databases: all
+        method: scram-sha-256
+        create: true
+      notify:
+        - Reload pgsql
+  
+    - name: Add to pg_hba 'host all all 127.0.0.1/32 md5'
+      community.postgresql.postgresql_pg_hba:
+        dest: /etc/postgresql/15/main/pg_hba.conf
+        contype: host
+        users: all
+        source: 127.0.0.1/32
+        databases: all
+        method: md5
+        create: true
+      notify:
+        - Reload pgsql
+
+    # - name: Dinamic modify custom pg params
+    #   become: true
+    #   become_user: postgres
+    #   block:
+    #   - name: Set work mem parameter
+    #     community.postgresql.postgresql_set:
+    #       name: listen_addresses
+    #       value: '*'
+    #     register: set
+
+    #   - name: Print the result if the setting changed
+    #     ansible.builtin.debug:
+    #       msg: "{{ set.name }} {{ set.prev_val_pretty }} >> {{ set.value_pretty }} restart_req: {{ set.restart_required }}"
+    #     when: set.changed
 
   handlers:
     - name: Restart pgsql
       ansible.builtin.service:
         name: postgresql
         state: restarted
+
+    - name: Reload pgsql
+      ansible.builtin.service:
+        name: postgresql
+        state: reloaded

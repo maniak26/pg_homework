@@ -68,16 +68,16 @@
           community.postgresql.postgresql_db:
             name: thai
 
-      # INIT PGBENCH FOR POSTGRES DB
-        - name: init pgbench
-          shell: pgbench -i thai
-
         - name: CREATE EXTENSION IF NOT EXISTS pg_stat_statements
           community.postgresql.postgresql_ext:
             name: pg_stat_statements
             db: thai
         - name: restore thai db from dump
           shell: psql -d thai < /var/lib/postgresql/thai.sql
+
+      # INIT PGBENCH FOR POSTGRES DB
+        - name: init pgbench
+          shell: pgbench -i thai
 
         # Красиво но не пашет - msg: 'Cannot read file ''/var/lib/postgresql/thai.sql'' : '
         # https://github.com/ansible-collections/community.postgresql/issues/180
@@ -99,10 +99,9 @@
 
         - name: Copy workload file to postgres home
           ansible.builtin.copy:
-            src: "files/sql/workload.sql"
-            dest: "/var/lib/postgresql/workload.sql"
+            src: "files/sql/workloads/"
+            dest: "/var/lib/postgresql/"
             owner: postgres
             group: postgres
             mode: '0644'
             remote_src: false
-
