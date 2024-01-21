@@ -21,6 +21,7 @@
           - htop
           - unzip
           - netperf
+          - python3-pip
   handlers:
     - name: Reboot vm
       ansible.builtin.reboot:

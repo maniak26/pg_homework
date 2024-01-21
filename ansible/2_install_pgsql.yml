@@ -18,9 +18,15 @@
         name:
           - "postgresql-{{ postgresql_version }}"
           - pgtop
+          - python3-psycopg2
         update_cache: true
     - name: Backup original config
       ansible.builtin.copy:
         remote_src: true
         src: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
         dest: /root/postgresql.conf"
+    # - name: install python modules
+    #   ansible.builtin.pip:
+    #     name: "{{ item }}"
+    #   with_items:
+    #     - psycopg2
