@@ -1,7 +1,8 @@
 - hosts: all
   gather_facts: true
+  become: true
   vars:
-    ansible_user: root
+    # ansible_user: root
     sysctl_param_state: present # absent
   tasks:
     - name: Set vm.swappiness
@@ -11,14 +12,14 @@
         state: "{{ sysctl_param_state }}"
       notify:
         - Reboot vm
-    
+
     # $ head -1 /var/lib/postgresql/postmaster.pid
     # 7192
     # grep ^VmPeak /proc/$(head -1 /var/lib/postgresql/15/main/postmaster.pid)/status
     # VmPeak:	 2238736 kB
     # grep ^Hugepagesize /proc/meminfo
     # Hugepagesize:       2048 kB
-    # round (2238736 / 2048) = 
+    # round (2238736 / 2048) = 1094
     - name: Set vm.nr_hugepages
       ansible.posix.sysctl:
         name: vm.nr_hugepages

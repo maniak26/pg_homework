@@ -1,7 +1,8 @@
 - hosts: all
   gather_facts: true
+  become: true
   vars:
-    ansible_user: root
+    # ansible_user: root
     thai_db_option: medium # small medium big
     # moved to hostvars
     # postgresql_version: 15
@@ -40,22 +41,22 @@
             remote_src: false
           when: not remote_stat_result.stat.exists
 
-        - name: remove file if exists
+        - name: Remove file if exists
           ansible.builtin.file:
             path: /var/lib/postgresql/thai.sql
             state: absent
           when: not remote_stat_result.stat.exists
-          
+
         - name: Unarchive db file
           ansible.builtin.unarchive:
             src: "/var/lib/postgresql/thai_{{ thai_db_option }}.tar.gz"
             dest: /var/lib/postgresql
-            remote_src: yes
+            remote_src: true
           when: not remote_stat_result.stat.exists
 
       # INIT PGBENCH FOR POSTGRES DB
-        - name: init pgbench
-          shell: pgbench -i postgres
+        - name: Init pgbench
+          ansible.builtin.shell: pgbench -i postgres
 
       # CREATE THAI DB
         - name: DROP DATABASE thai
@@ -72,12 +73,12 @@
           community.postgresql.postgresql_ext:
             name: pg_stat_statements
             db: thai
-        - name: restore thai db from dump
-          shell: psql -d thai < /var/lib/postgresql/thai.sql
+        - name: Restore thai db from dump
+          ansible.builtin.shell: psql -d thai < /var/lib/postgresql/thai.sql
 
       # INIT PGBENCH FOR POSTGRES DB
-        - name: init pgbench
-          shell: pgbench -i thai
+        - name: Init pgbench
+          ansible.builtin.shell: pgbench -i thai
 
         # Красиво но не пашет - msg: 'Cannot read file ''/var/lib/postgresql/thai.sql'' : '
         # https://github.com/ansible-collections/community.postgresql/issues/180
@@ -86,7 +87,7 @@
         #     db: thai
         #     path: /var/lib/postgresql/thai.sql
         #   register: resulit
-        
+
         # - name: Print init result
         #   ansible.builtin.debug:
         #     var: resulit.query

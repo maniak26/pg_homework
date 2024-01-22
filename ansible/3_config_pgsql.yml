@@ -1,7 +1,8 @@
 - hosts: all
   gather_facts: true
+  become: true
   vars:
-    ansible_user: root
+    # ansible_user: root
     # moved to hostvars
     # postgresql_version: 15
   tasks:
@@ -24,8 +25,8 @@
     - name: Configure PostgreSQL. Set listen_addresses.
       lineinfile: 
         dest: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
-        regexp: "listen_addresses =" 
-        line: "listen_addresses = '*'" 
+        regexp: "listen_addresses ="
+        line: "listen_addresses = '*'"
         state: present
       notify: Restart pgsql
     # PG_HBA
@@ -40,7 +41,6 @@
         create: true
       notify:
         - Reload pgsql
-  
     - name: Add to pg_hba 'host all all 127.0.0.1/32 md5'
       community.postgresql.postgresql_pg_hba:
         dest: /etc/postgresql/15/main/pg_hba.conf
