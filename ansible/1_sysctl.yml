@@ -13,17 +13,19 @@
       notify:
         - Reboot vm
 
-    # $ head -1 /var/lib/postgresql/postmaster.pid
+    # $ head -1 /var/lib/postgresql/15/main/postmaster.pid
     # 7192
     # grep ^VmPeak /proc/$(head -1 /var/lib/postgresql/15/main/postmaster.pid)/status
-    # VmPeak:	 2238736 kB
+    # VmPeak:	  219244 kB
     # grep ^Hugepagesize /proc/meminfo
     # Hugepagesize:       2048 kB
-    # round (2238736 / 2048) = 1094
+    # round (219244 / 2048) = 108
+    # round (4385912 / 2048) = 2142
+    # 2141,55859375
     - name: Set vm.nr_hugepages
       ansible.posix.sysctl:
         name: vm.nr_hugepages
-        value: 1094
+        value: 2142
         state: "{{ sysctl_param_state }}"
       notify:
         - Reboot vm

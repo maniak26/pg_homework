@@ -1,0 +1,48 @@
+- hosts: all
+  gather_facts: true
+  become: true
+  vars:
+    # ansible_user: root
+    # moved to hostvars
+    # postgresql_version: 15
+  tasks:
+    - name: Dinamic modify custom pg params
+      become: true
+      become_user: postgres
+      block:
+      - name: Set huge_pages
+        community.postgresql.postgresql_set:
+          name: huge_pages
+          value: 'try'
+        register: set
+    - name: Restart pgsql
+      ansible.builtin.service:
+        name: postgresql
+        state: restarted
+
+    - name: Print the result if the setting changed
+      ansible.builtin.debug:
+        msg: "{{ set.name }} {{ set.prev_val_pretty }} >> {{ set.value_pretty }} restart_req: {{ set.restart_required }}"
+      when: set.changed
+
+    # - name: Set jit
+    #   community.postgresql.postgresql_set:
+    #     name: jit
+    #     value: 'on'
+    #   register: set
+
+    # - name: Print the result if the setting changed
+    #   ansible.builtin.debug:
+    #     msg: "{{ set.name }} {{ set.prev_val_pretty }} >> {{ set.value_pretty }} restart_req: {{ set.restart_required }}"
+    #   when: set.changed
+
+  handlers:
+    - name: Restart pgsql
+      ansible.builtin.service:
+        name: postgresql
+        state: restarted
+
+    - name: Reload pgsql
+      ansible.builtin.service:
+        name: postgresql
+        state: reloaded
