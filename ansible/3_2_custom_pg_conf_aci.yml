@@ -1,0 +1,62 @@
+- hosts: all
+  gather_facts: true
+  become: true
+  vars:
+    # ansible_user: root
+    # moved to hostvars
+    # postgresql_version: 15
+  tasks:
+    - name: Dinamic modify custom pg params
+      become: true
+      become_user: postgres
+      block:
+      - name: Set synchronous_commit
+        community.postgresql.postgresql_set:
+          name: synchronous_commit
+          value: 'off'
+        register: set
+        notify:
+          - Restart pgsql
+
+      - name: Print the result if the setting changed
+        ansible.builtin.debug:
+          msg: "{{ set.name }} {{ set.prev_val_pretty }} >> {{ set.value_pretty }} restart_req: {{ set.restart_required }}"
+        when: set.changed
+
+      - name: Set fsync
+        community.postgresql.postgresql_set:
+          name: fsync
+          value: 'off'
+        register: set
+        notify:
+          - Restart pgsql
+
+      - name: Print the result if the setting changed
+        ansible.builtin.debug:
+          msg: "{{ set.name }} {{ set.prev_val_pretty }} >> {{ set.value_pretty }} restart_req: {{ set.restart_required }}"
+        when: set.changed
+
+      - name: Set full_page_writes
+        community.postgresql.postgresql_set:
+          name: full_page_writes
+          value: 'off'
+        register: set
+        notify:
+          - Restart pgsql
+
+      - name: Print the result if the setting changed
+        ansible.builtin.debug:
+          msg: "{{ set.name }} {{ set.prev_val_pretty }} >> {{ set.value_pretty }} restart_req: {{ set.restart_required }}"
+        when: set.changed
+
+
+  handlers:
+    - name: Restart pgsql
+      ansible.builtin.service:
+        name: postgresql
+        state: restarted
+
+    - name: Reload pgsql
+      ansible.builtin.service:
+        name: postgresql
+        state: reloaded

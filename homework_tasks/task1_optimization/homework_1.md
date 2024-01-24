@@ -223,3 +223,23 @@ huge_pages = off > try
 | tps (without initial connection time) ms  | 1422.24421133              | 1490.152233                | 1403.8497                  | 1443.709467                |
 
 ### 4. Настроить на оптимальную производительность, не обращая внимание на ACID <a name="extreme_fast_conig"></a>
+
+4.1
+synchronous_commit=off
+fsync=off
+full_page_writes=off
+
+|                                           | среднее simple             | simple + pg_aci 4.1        | среднее extended           | extended + pg_aci 4.1      |
+|-------------------------------------------|----------------------------|----------------------------|----------------------------|----------------------------|
+| transaction type                          | <builtin: TPC-B (sort of)> | <builtin: TPC-B (sort of)> | <builtin: TPC-B (sort of)> | <builtin: TPC-B (sort of)> |
+| scaling factor                            | 1                          | 1                          | 1                          | 1                          |
+| number of clients                         | 20                         | 20                         | 20                         | 20                         |
+| number of threads                         | 8                          | 8                          | 8                          | 8                          |
+| maximum number of tries                   | 1                          | 1                          | 1                          | 1                          |
+| duration                                  | 60 s                       | 60 s                       | 60 s                       | 60 s                       |
+| query mode                                | simple                     | simple                     | extended                   | extended                   |
+| number of transactions actually processed | 85336                      | 282533                     | 84234                      | 251300                     |
+| number of failed transactions             | 0                          | 0                          | 0                          | 0                          |
+| latency average ms                        | 14.0623                    | 4.247                      | 14.382                     | 4.775                      |
+| initial connection time ms                | 13.4523                    | 14.642                     | 13.4186                    | 13.658                     |
+| tps (without initial connection time) ms  | 1422.24421133              | 4709.264234                | 1403.8497                  | 4188.570197                |

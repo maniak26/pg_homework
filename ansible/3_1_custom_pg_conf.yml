@@ -10,20 +10,18 @@
       become: true
       become_user: postgres
       block:
-      - name: Set huge_pages
-        community.postgresql.postgresql_set:
-          name: huge_pages
-          value: 'try'
-        register: set
-    - name: Restart pgsql
-      ansible.builtin.service:
-        name: postgresql
-        state: restarted
+        - name: Set huge_pages
+          community.postgresql.postgresql_set:
+            name: huge_pages
+            value: 'try'
+          register: set
+          notify:
+            - Restart pgsql
 
-    - name: Print the result if the setting changed
-      ansible.builtin.debug:
-        msg: "{{ set.name }} {{ set.prev_val_pretty }} >> {{ set.value_pretty }} restart_req: {{ set.restart_required }}"
-      when: set.changed
+        - name: Print the result if the setting changed
+          ansible.builtin.debug:
+            msg: "{{ set.name }} {{ set.prev_val_pretty }} >> {{ set.value_pretty }} restart_req: {{ set.restart_required }}"
+          when: set.changed
 
     # - name: Set jit
     #   community.postgresql.postgresql_set:
