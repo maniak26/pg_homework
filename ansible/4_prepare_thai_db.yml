@@ -8,7 +8,11 @@
     # postgresql_version: 15
 
   tasks:
+
+  # тут надо хорошенько подумать, чтоб быстрее - держать локально копию
+  # и заливать ее на сервер или напрямую на сервере скачивать
     - name: Download db file to localhost
+      become: false
       delegate_to: localhost
       block:
         - name: Check that the thai db file exists
@@ -24,7 +28,7 @@
 
     - name: Install db from template
       become: true
-      become_user: postgres
+      become_user: root
       block:
         - name: Check that the thai db file exists
           ansible.builtin.stat:
@@ -51,11 +55,28 @@
           ansible.builtin.unarchive:
             src: "/var/lib/postgresql/thai_{{ thai_db_option }}.tar.gz"
             dest: /var/lib/postgresql
+            owner: postgres
+            group: postgres
+            mode: '0644'
             remote_src: true
           when: not remote_stat_result.stat.exists
 
+        - name: Copy workload files to postgres home
+          ansible.builtin.copy:
+            src: "files/sql/workloads/"
+            dest: "/var/lib/postgresql/"
+            owner: postgres
+            group: postgres
+            mode: '0644'
+            remote_src: false
+
+
+    - name: Install db from template
+      become: true
+      become_user: postgres
+      block:
       # INIT PGBENCH FOR POSTGRES DB
-        - name: Init pgbench
+        - name: Init pgbench for postgres db
           ansible.builtin.shell: pgbench -i postgres
 
       # CREATE THAI DB
@@ -68,15 +89,18 @@
         - name: CREATE DATABASE thai
           community.postgresql.postgresql_db:
             name: thai
+          when: not remote_stat_result.stat.exists
 
         - name: CREATE EXTENSION IF NOT EXISTS pg_stat_statements
           community.postgresql.postgresql_ext:
             name: pg_stat_statements
             db: thai
+
         - name: Restore thai db from dump
           ansible.builtin.shell: psql -d thai < /var/lib/postgresql/thai.sql
-
-      # INIT PGBENCH FOR POSTGRES DB
+          when: not remote_stat_result.stat.exists
+          
+      # INIT PGBENCH FOR thai DB
         - name: Init pgbench
           ansible.builtin.shell: pgbench -i thai
 
@@ -98,11 +122,3 @@
         #   ansible.builtin.debug:
         #     var: resulit.statusmessage # rowcount
 
-        - name: Copy workload file to postgres home
-          ansible.builtin.copy:
-            src: "files/sql/workloads/"
-            dest: "/var/lib/postgresql/"
-            owner: postgres
-            group: postgres
-            mode: '0644'
-            remote_src: false
