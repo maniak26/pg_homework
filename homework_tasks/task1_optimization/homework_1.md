@@ -222,7 +222,7 @@ huge_pages = off > try
 | initial connection time ms                | 13.4523                    | 13.524                     | 13.4186                    | 13.049                     |
 | tps (without initial connection time) ms  | 1422.24421133              | 1490.152233                | 1403.8497                  | 1443.709467                |
 
-### 4. Настроить на оптимальную производительность, не обращая внимание на ACID <a name="extreme_fast_conig"></a>
+### 4. Настроить на оптимальную производительность, не обращая внимание на ACI_D <a name="extreme_fast_conig"></a>
 
 4.1
 synchronous_commit=off

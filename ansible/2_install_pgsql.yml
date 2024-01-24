@@ -21,6 +21,9 @@
           - pgtop
           - python3-psycopg2
           - pgpool2
+          - libdbd-pg-perl 
+          - libdbi-perl 
+          - perl-modules
         update_cache: true
 
     - name: Backup original config
@@ -28,6 +31,14 @@
         remote_src: true
         src: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
         dest: /root/postgresql.conf"
+
+    - name: Download postgresqltuner
+      ansible.builtin.get_url:
+        url: "https://postgresqltuner.pl"
+        dest: "/var/lib/postgresql/postgresqltuner.pl"
+        owner: postgres
+        group: postgres
+        mode: '0755'
 
     # - name: install python modules
     #   ansible.builtin.pip:
