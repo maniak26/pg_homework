@@ -50,6 +50,31 @@ ansible-playbook -i hosts.ini 4_prepare_thai_db.yml
 
 ### 2. Провести первичный бенчмарк (простой и расширенный варианты) <a name="reference_benchmark"></a>
 
+Для удобства повторный запусков обернем команды ниже в [ansible плейбук](https://github.com/maniak26/pg_homework/blob/homework_1/ansible/5_run_pgbench.yml)
+
+```BASH
+pgbench -i
+pgbench -P 1 --client=20 --jobs=8 --time=60 --builtin=tpcb-like --protocol=simple --vacuum-all postgres
+pgbench -P 1 --client=20 --jobs=8 --time=60 --builtin=tpcb-like --protocol=extended --vacuum-all postgres
+```
+
+Для начала убедимся что получаем валидные результаты путем трехкратного прогона одного и того же теста:
+
+|                                           | simple test 1              | simple test 2              | simple test 3              | extended test 1            | extended test 2            | extended test 2            |
+|-------------------------------------------|----------------------------|----------------------------|----------------------------|----------------------------|----------------------------|----------------------------|
+| transaction type                          | <builtin: TPC-B (sort of)> | <builtin: TPC-B (sort of)> | <builtin: TPC-B (sort of)> | <builtin: TPC-B (sort of)> | <builtin: TPC-B (sort of)> | <builtin: TPC-B (sort of)> |
+| scaling factor                            | 1                          | 1                          | 1                          | 1                          | 1                          | 1                          |
+| number of clients                         | 20                         | 20                         | 20                         | 20                         | 20                         | 20                         |
+| number of threads                         | 8                          | 8                          | 8                          | 8                          | 8                          | 8                          |
+| maximum number of tries                   | 1                          | 1                          | 1                          | 1                          | 1                          | 1                          |
+| duration                                  | 60 s                       | 60 s                       | 60 s                       | 60 s                       | 60 s                       | 60 s                       |
+| query mode                                | simple                     | simple                     | simple                     | extended                   | extended                   | extended                   |
+| number of transactions actually processed | 85195                      | 85201                      | 85612                      | 84683                      | 83250                      | 84769                      |
+| number of failed transactions             | 0                          | 0                          | 0                          | 0                          |                            |                            |
+| latency average                           | 14.085 ms                  | 14.085 ms                  | 14.017 ms                  | 14.171 ms                  | 14.415 ms                  | 14.156 ms                  |
+| initial connection time                   | 13.090 ms                  | 13.382 ms                  | 13.885 ms                  | 13.192 ms                  | 12.878 ms                  | 14.186 ms                  |
+| tps (without initial connection time)     | 1419.90739                 | 1419.951538                | 1426.873706                | 1411.328009                | 1387.438167                | 1412.782948                |
+
 ### 3. Настроить на оптимальную производительность <a name="optimal_config"></a>
 
 ### 4. Настроить на оптимальную производительность, не обращая внимание на ACID <a name="extreme_fast_conig"></a>

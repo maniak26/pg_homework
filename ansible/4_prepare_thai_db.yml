@@ -75,9 +75,6 @@
       become: true
       become_user: postgres
       block:
-      # INIT PGBENCH FOR POSTGRES DB
-        - name: Init pgbench for postgres db
-          ansible.builtin.shell: pgbench -i postgres
 
       # CREATE THAI DB
         - name: DROP DATABASE thai
