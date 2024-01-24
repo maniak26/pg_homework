@@ -1,0 +1,29 @@
+- hosts: all
+  gather_facts: true
+  become: true
+  become_user: postgres
+  vars:
+    pgbench_clients: 20
+    pgbench_jobs: 8
+    pgbench_time: 30
+    pgbench_workload_file: workload.sql
+    pgbench_vacuumfull: true
+    workload_db_name: thai
+  tasks:
+    - name: VACUUM FULL ANALYZE ALL DBS
+      shell: |
+        vacuumdb -a -f -z -v
+      args:
+        chdir: /var/lib/postgresql/
+      when: pgbench_vacuumfull|bool
+
+    - name: RUN PGBENCH
+      shell: |
+        /usr/lib/postgresql/{{ postgresql_version }}/bin/pgbench -c {{ pgbench_clients }} -j {{ pgbench_jobs }} -T {{ pgbench_time }} -f {{ pgbench_workload_file }} -U postgres {{ workload_db_name }}
+      args:
+        chdir: /var/lib/postgresql/
+      register: _pgbench_result
+
+    - name: SHOW PGBENCH RESULT
+      debug:
+        var: _pgbench_result.stdout
