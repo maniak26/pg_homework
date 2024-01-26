@@ -1,7 +1,8 @@
 - hosts: all
   gather_facts: true
   become: true
-  # vars:
+  vars:
+    swap_file_size_mb: "{{ [(ansible_memory_mb.real.total / 2), 65536] | min | int }}"
   #   ansible_user: root
   tasks:
     - name: Update all packages
@@ -23,6 +24,8 @@
           - unzip
           - netperf
           - python3-pip
+  roles:
+    - swap
   handlers:
     - name: Reboot vm
       ansible.builtin.reboot:

@@ -23,7 +23,7 @@
         - Restart pgsql
 
     - name: Configure PostgreSQL. Set listen_addresses.
-      lineinfile: 
+      lineinfile:
         dest: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
         regexp: "listen_addresses ="
         line: "listen_addresses = '*'"
@@ -32,7 +32,7 @@
     # PG_HBA
     - name: Add to pg_hba 'host all all 10.0.0.0/8 scram-sha-256'
       community.postgresql.postgresql_pg_hba:
-        dest: /etc/postgresql/15/main/pg_hba.conf
+        dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
         contype: host
         users: all
         source: 10.0.0.0/8
@@ -43,7 +43,7 @@
         - Reload pgsql
     - name: Add to pg_hba 'host all all 127.0.0.1/32 md5'
       community.postgresql.postgresql_pg_hba:
-        dest: /etc/postgresql/15/main/pg_hba.conf
+        dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
         contype: host
         users: all
         source: 127.0.0.1/32

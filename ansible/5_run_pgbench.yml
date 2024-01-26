@@ -1,0 +1,59 @@
+- hosts: all
+  gather_facts: true
+  become: true
+  become_user: postgres
+  vars:
+    pgbench_clients: 20
+    pgbench_jobs: 8
+    pgbench_time: 60
+    pgbench_builtin_workload: tpcb-like # tpcb-like, simple-update or select-only
+    pgbench_protocol: simple # extended prepared https://www.postgresql.org/docs/current/pgbench.html#PGBENCH-OPTION-PROTOCOL
+    # pgbench_workload_file: workload.sql
+
+    workload_db_name: postgres
+  tasks:
+
+  # INIT PGBENCH FOR POSTGRES DB
+    - name: Init pgbench for postgres db
+      ansible.builtin.shell: "pgbench -i {{ workload_db_name }}"
+
+        # -f {{ pgbench_workload_file }} \
+    - name: Pgbench simple
+      vars:
+        pgbench_protocol: simple
+      ansible.builtin.shell: |
+        pgbench \
+        --client {{ pgbench_clients }} \
+        --jobs {{ pgbench_jobs }} \
+        --time {{ pgbench_time }} \
+        --builtin {{ pgbench_builtin_workload }} \
+        --protocol {{ pgbench_protocol }} \
+        --vacuum-all \
+        -U postgres {{ workload_db_name }}
+      args:
+        chdir: /var/lib/postgresql/
+      register: _pgbench_result
+
+    - name: SHOW PGBENCH RESULT simple
+      ansible.builtin.debug:
+        var: _pgbench_result.stdout
+
+    - name: Pgbench simple
+      vars:
+        pgbench_protocol: extended
+      ansible.builtin.shell: |
+        pgbench \
+        --client {{ pgbench_clients }} \
+        --jobs {{ pgbench_jobs }} \
+        --time {{ pgbench_time }} \
+        --builtin {{ pgbench_builtin_workload }} \
+        --protocol {{ pgbench_protocol }} \
+        --vacuum-all \
+        -U postgres {{ workload_db_name }}
+      args:
+        chdir: /var/lib/postgresql/
+      register: _pgbench_result
+
+    - name: SHOW PGBENCH RESULT
+      ansible.builtin.debug:
+        var: _pgbench_result.stdout
