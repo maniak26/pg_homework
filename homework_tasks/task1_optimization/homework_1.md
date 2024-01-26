@@ -50,7 +50,7 @@ ansible-playbook -i hosts.ini 4_prepare_thai_db.yml
 
 ### 2. Провести первичный бенчмарк (простой и расширенный варианты) <a name="reference_benchmark"></a>
 
-Для удобства повторный запусков обернем команды ниже в [ansible плейбук](https://github.com/maniak26/pg_homework/blob/homework_1/ansible/5_run_pgbench.yml)
+Для удобства повторный запусков обернем команды ниже в [ansible плейбук](https://github.com/maniak26/pg_homework/blob/main/ansible/5_run_pgbench.yml)
 
 ```BASH
 pgbench -i
@@ -111,7 +111,7 @@ pgbench -P 1 --client=20 --jobs=8 --time=60 --builtin=tpcb-like --protocol=exten
 
 #### 3.1 Настройка Linux
 
-Настройки будем менять [плейбуком](https://github.com/maniak26/pg_homework/blob/homework_1/ansible/1_sysctl.yml) для упрощения повторов тестов
+Настройки будем менять [плейбуком](https://github.com/maniak26/pg_homework/blob/main/ansible/1_sysctl.yml) для упрощения повторов тестов
 
 3.1.1 vm.swappiness = 5
 3.1.2 vm.nr_hugepages = 108
@@ -179,7 +179,7 @@ root@pg15:~# numactl --hardware
 
 _* В тестах используется 20 коннектов, но по условиям задачи нужен оптимальный конфиг. Полезно иметь возможность принять больше клиентов чем закладывали без перезагрузки БД_
 
-3.2.1 [Базовый конфиг](https://github.com/maniak26/pg_homework/blob/homework_1/ansible/files/configs/pg_15.conf) бездумно сгенерим [конфигуратором от cybertec](https://pgconfigurator.cybertec.at/) и зальем на кластер с помощью [плейбука](https://github.com/maniak26/pg_homework/blob/homework_1/ansible/3_config_pgsql.yml)
+3.2.1 [Базовый конфиг](https://github.com/maniak26/pg_homework/blob/main/ansible/files/configs/pg_15.conf) бездумно сгенерим [конфигуратором от cybertec](https://pgconfigurator.cybertec.at/) и зальем на кластер с помощью [плейбука](https://github.com/maniak26/pg_homework/blob/main/ansible/3_config_pgsql.yml)
 
 Получаем результаты сравнимые в пределах погрешности с эталоном и идем смотреть подробно параметры
 
