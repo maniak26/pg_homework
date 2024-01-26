@@ -225,6 +225,7 @@ huge_pages = off > try
 ### 4. Настроить на оптимальную производительность, не обращая внимание на ACI_D <a name="extreme_fast_conig"></a>
 
 4.1
+
 synchronous_commit=off
 fsync=off
 full_page_writes=off
@@ -243,3 +244,31 @@ full_page_writes=off
 | latency average ms                        | 14.0623                    | 4.247                      | 14.382                     | 4.775                      |
 | initial connection time ms                | 13.4523                    | 14.642                     | 13.4186                    | 13.658                     |
 | tps (without initial connection time) ms  | 1422.24421133              | 4709.264234                | 1403.8497                  | 4188.570197                |
+
+4.2 "In-memory DB нынче в моде"
+
+Создадим ВМ с 24Gb ram, 8 из которых будем использовать как ram disk, который примонтируем в /var/lib/postgresql. Главное держать в голове что ее ребутить нельзя =)
+
+```bash
+mkdir -p /var/lib/postgresql
+mount -t tmpfs -o size=8G tmpfs /var/lib/postgresql
+```
+
+|                                           | среднее simple             | simple + ram pg            | среднее extended           | extended + ram pg          |
+|-------------------------------------------|----------------------------|----------------------------|----------------------------|----------------------------|
+| transaction type                          | <builtin: TPC-B (sort of)> | <builtin: TPC-B (sort of)> | <builtin: TPC-B (sort of)> | <builtin: TPC-B (sort of)> |
+| scaling factor                            | 1                          | 1                          | 1                          | 1                          |
+| number of clients                         | 20                         | 20                         | 20                         | 20                         |
+| number of threads                         | 8                          | 8                          | 8                          | 8                          |
+| maximum number of tries                   | 1                          | 1                          | 1                          | 1                          |
+| duration                                  | 60 s                       | 60 s                       | 60 s                       | 60 s                       |
+| query mode                                | simple                     | simple                     | extended                   | extended                   |
+| number of transactions actually processed | 85336                      | 274306                     | 84234                      | 245546                     |
+| number of failed transactions             | 0                          | 0                          | 0                          | 0                          |
+| latency average ms                        | 14.0623                    | 4.374                      | 14.382                     | 4.887                      |
+| initial connection time ms                | 13.4523                    | 14.090                     | 13.4186                    | 13.114                     |
+| tps (without initial connection time) ms  | 1422.24421133              | 4572.159949                | 1403.8497                  | 4092.742745                |
+
+Результат примерно сравним с отключением [synchronous_commit](https://postgrespro.ru/docs/postgresql/15/runtime-config-wal#GUC-SYNCHRONOUS-COMMIT), [fsync](https://postgrespro.ru/docs/postgresql/15/runtime-config-wal#GUC-FSYNC) и [full_page_writes](https://postgrespro.ru/docs/postgresql/15/runtime-config-wal#GUC-FULL-PAGE-WRITES)
+
+Полезная ссылка [Как на самом деле Linux выполняет запись на диск](https://habr.com/ru/companies/nmg/articles/750794/)
